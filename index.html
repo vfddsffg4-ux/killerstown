@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Город убийц</title>
+<style>
+:root{--bg:#0c0e13;--pn:#161a22;--pn2:#1d222c;--tx:#ebe7e1;--mu:#9aa0ab;--rd:#c0392b;--gd:#d6a94a;--gr:#2f8f5b;--bl:#3a7bd5}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer;border:0}
+#app{min-height:100dvh}
+/* меню */
+.menu{min-height:100dvh;display:flex;flex-direction:column;justify-content:space-between;padding:6vh 20px 6vh;background:radial-gradient(ellipse at top,#2a1215,#0c0e13 70%)}
+.menu h1{margin:0;text-align:center;font:900 clamp(48px,15vw,150px)/.95 Georgia,serif;letter-spacing:.04em;color:#e9d9c3;text-shadow:0 4px 30px #c0392b88}
+.menu .bt{display:flex;flex-direction:column;gap:14px;max-width:420px;width:100%;margin:0 auto}
+.big{padding:18px;font-size:20px;font-weight:700;border-radius:14px;background:var(--rd);box-shadow:0 6px 20px #0008}
+.big.alt{background:var(--pn2);border:1px solid #394050}
+.sub{padding:12px 16px;border-radius:10px;background:var(--pn2);border:1px solid #394050}
+.sub.pri{background:var(--rd);border-color:var(--rd)}
+.sub[disabled],.big[disabled]{opacity:.45}
+.wrap{max-width:640px;margin:0 auto;padding:18px}
+h2{margin:.2em 0 .6em}
+.rrow{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--pn);padding:12px 14px;border-radius:12px;margin-bottom:8px}
+.mu{color:var(--mu)}
+/* аватарки */
+.fr{width:52px;height:52px;border-radius:12px;border:2px solid #4a5163;background:var(--pn2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;overflow:hidden;flex:none;position:relative}
+.fr img{width:100%;height:100%;object-fit:cover}
+.fr.mine{border-color:var(--gd);cursor:pointer}
+.prow .fr{width:44px;height:44px;font-size:17px}
+.pl{display:flex;align-items:center;gap:12px;background:var(--pn);padding:10px 12px;border-radius:12px;margin-bottom:8px}
+.tag{font-size:12px;background:var(--gd);color:#000;border-radius:6px;padding:2px 7px;font-weight:700;margin-left:6px}
+.off{opacity:.45}
+/* игра */
+.game{display:grid;grid-template-columns:minmax(160px,22%) minmax(0,1fr) minmax(190px,26%);gap:8px;height:100dvh;padding:8px 8px 76px}
+.panel{background:var(--pn);border-radius:12px;padding:10px;overflow:auto;min-height:0}
+.panel h3{margin:0 0 8px;font-size:15px;color:var(--gd)}
+.center{display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0}
+.table{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;background:linear-gradient(135deg,#3a2616,#4b311b);border:6px solid #2a190d;border-radius:14px;padding:8px;box-shadow:inset 0 0 40px #0009}
+.prow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.pc{display:flex;flex-direction:column;align-items:center;width:62px;cursor:pointer;font-size:11px}
+.pc .fr{border-color:#7a6a58}
+.pc.turn .fr{border-color:var(--gd);box-shadow:0 0 14px var(--gd)}
+.pc.me .fr{border-color:var(--bl)}
+.pc.dead{opacity:.4;filter:grayscale(1)}
+.pc.dead .fr::after{content:'✕';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:32px;color:#e55;background:#0006}
+.pc span{max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.city{flex:1;min-height:90px;position:relative;border:2px dashed #8a7458;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#c9b694;text-align:center;font-size:13px;overflow:hidden;background:#0003}
+.city img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.locs{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px}
+.loc{position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:linear-gradient(160deg,#2c3446,#171b25);border:2px solid #5b6577;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:6px;text-align:center;cursor:pointer}
+.loc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.9}
+.loc .li{position:absolute;top:18%;font-size:30px}
+.loc b{position:relative;font-size:12px;background:#000a;padding:2px 6px;border-radius:6px}
+.loc.pick{border-color:var(--gd);animation:pk 1s infinite alternate}
+@keyframes pk{to{box-shadow:0 0 16px var(--gd)}}
+.status{background:var(--pn);border-radius:10px;padding:8px 12px;font-size:14px;text-align:center}
+.status.my{background:#3a2b0d;color:var(--gd)}
+.btns{position:fixed;left:0;right:0;bottom:0;padding:10px 10px calc(10px + env(safe-area-inset-bottom));background:#0c0e13ee;display:flex;gap:8px;justify-content:center;z-index:5}
+.btns button{flex:1;max-width:200px;padding:14px 6px;border-radius:12px;background:var(--pn2);border:1px solid #444c5e;font-weight:700}
+.btns button.r{background:var(--rd);border-color:var(--rd)}
+.btns .wait{color:var(--mu);align-self:center}
+.card{background:var(--pn2);border-radius:8px;padding:7px 9px;margin-bottom:6px;border-left:4px solid #666}
+.card small{display:block;color:var(--mu);font-size:11px}
+.card.t-pos{border-color:var(--gr)}.card.t-neu{border-color:var(--gd)}.card.t-neg{border-color:var(--rd)}
+.role{background:#2a1c1f;border:1px solid var(--rd);border-radius:10px;padding:8px;margin-bottom:8px;font-size:13px}
+.role b{display:block;font-size:16px;color:#ffb3a8}
+.le{padding:6px 8px;margin-bottom:5px;border-radius:8px;background:var(--pn2);font-size:13px;word-break:break-word}
+.le.turn{color:var(--gd);font-weight:700}.le.sys{color:#9ec2ff}.le.death{color:#ff8a80;font-weight:700}
+.le.priv,.le.clue{background:#1d2a22;border-left:3px solid var(--gr)}
+.le.alert{background:#35291a;color:#ffd48a}
+.le.accuse{background:#3b1717;border:1px solid var(--rd);padding:10px}
+.le.accuse .bg{font-size:20px;font-weight:900;margin-bottom:6px}
+.le.accuse button{background:var(--rd);padding:8px 14px;border-radius:8px;font-weight:700}
+.le.accuse button[disabled]{opacity:.4}
+.mini{display:inline-block;margin-top:6px;padding:7px 10px;border-radius:8px;background:var(--pn2);border:1px solid #444c5e;font-size:13px}
+/* модалки */
+#modal{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;background:#000a;padding:14px}
+#modal.on{display:flex}
+.mb{background:var(--pn);border-radius:14px;padding:16px;width:100%;max-width:440px;max-height:85dvh;overflow:auto;border:1px solid #394050}
+.mb h3{margin:0 0 10px}
+.mb input{width:100%;padding:12px;border-radius:10px;border:1px solid #444c5e;background:var(--pn2);color:var(--tx);font-size:17px}
+.opt{display:block;width:100%;text-align:left;padding:11px 12px;border-radius:10px;background:var(--pn2);border:1px solid #394050;margin-bottom:7px}
+.opt small{display:block;color:var(--mu)}
+.opt[disabled]{opacity:.4}
+.row{display:flex;gap:8px;margin-top:10px}.row>*{flex:1}
+#toast{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:40;display:flex;flex-direction:column;gap:6px;width:min(92vw,460px);pointer-events:none}
+.tt{background:#4a1b1b;border:1px solid var(--rd);padding:10px 14px;border-radius:10px;text-align:center;box-shadow:0 6px 20px #000a}
+.tt.ok{background:#173a28;border-color:var(--gr)}
+.banner{position:fixed;top:0;left:0;right:0;z-index:15;background:var(--gd);color:#000;padding:10px;text-align:center;font-weight:700}
+.banner button{margin-left:10px;padding:4px 10px;border-radius:8px;background:#0003}
+.ba{padding:2px 7px;border-radius:6px;font-size:11px;margin-left:4px}.ba.real{background:var(--gr)}.ba.fake{background:var(--rd)}
+@media(max-width:820px){
+ .game{grid-template-columns:1fr 1fr;grid-template-rows:auto minmax(0,1fr);height:auto;min-height:100dvh}
+ .center{grid-column:1/-1;grid-row:1}
+ .panel{max-height:44vh}
+ .btns button{font-size:13px;padding:13px 2px}
+}
+</style></head>
+<body>
+<div id="app"></div><div id="modal"></div><div id="toast"></div>
+<input type="file" id="file" accept="image/*" hidden>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+const TN = { pos: 'Положительное', neu: 'Нейтральное', neg: 'Отрицательное' };
+let token = localStorage.getItem('cok_token'), S = null, es = null, rs = null, rooms = [], screen = 'menu', viewing = null, pickLoc = null, modalKind = null;
+
+async function post(url, b) {
+  try { const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) }); return await r.json(); }
+  catch (e) { return { err: 'Нет связи с сервером' }; }
+}
+function toast(t, ok) {
+  const d = document.createElement('div'); d.className = 'tt' + (ok ? ' ok' : ''); d.textContent = t; $('#toast').appendChild(d);
+  setTimeout(() => d.remove(), ok ? 3200 : 4500);
+}
+function showModal(html, kind, dismiss = true) {
+  const m = $('#modal'); m.innerHTML = '<div class="mb">' + html + '</div>'; m.className = 'on'; modalKind = kind || 'x'; m.dataset.dismiss = dismiss ? '1' : '';
+}
+function closeModal() { const m = $('#modal'); m.className = ''; m.innerHTML = ''; modalKind = null; }
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal' && e.target.dataset.dismiss) closeModal(); });
+
+function drop() { token = null; localStorage.removeItem('cok_token'); if (es) es.close(); es = null; S = null; screen = 'menu'; viewing = null; pickLoc = null; closeModal(); render(); }
+function connect() {
+  if (es) es.close();
+  es = new EventSource('/events?token=' + token);
+  es.addEventListener('state', e => { S = JSON.parse(e.data); if (screen !== 'rooms') screen = 'room'; render(); });
+  es.addEventListener('gone', () => drop());
+}
+function connectRooms() {
+  if (rs) return;
+  rs = new EventSource('/events/rooms');
+  rs.addEventListener('rooms', e => { rooms = JSON.parse(e.data); if (screen === 'rooms') render(); });
+}
+function askNick(title, cb) {
+  showModal(`<h3>${esc(title)}</h3><input id="nick" maxlength="16" placeholder="Ваш ник" value="${esc(localStorage.getItem('cok_nick') || '')}"><div class="row"><button class="sub" data-a="mclose">Отмена</button><button class="sub pri" id="nok">Готово</button></div>`, 'nick');
+  const go = () => { const n = $('#nick').value.trim(); if (!n) return toast('Введите ник'); localStorage.setItem('cok_nick', n); closeModal(); cb(n); };
+  $('#nok').onclick = go; $('#nick').onkeydown = e => { if (e.key === 'Enter') go(); }; setTimeout(() => $('#nick') && $('#nick').focus(), 50);
+}
+async function enter(url, body) {
+  const r = await post(url, { ...body, oldToken: token });
+  if (r.err) return toast(r.err);
+  token = r.token; localStorage.setItem('cok_token', token); screen = 'room'; connect();
+}
+
+// ---------- отрисовка ----------
+function render() {
+  if (screen === 'menu' || (!S && screen !== 'rooms')) return renderMenu();
+  if (screen === 'rooms') return renderRooms();
+  if (S.phase === 'lobby') return renderLobby();
+  renderGame();
+}
+function renderMenu() {
+  $('#app').innerHTML = `<div class="menu"><h1>ГОРОД<br>УБИЙЦ</h1><div class="bt"><button class="big" data-a="start">Начать игру</button><button class="big alt" data-a="rooms">Присоединиться</button></div></div>`;
+}
+function renderRooms() {
+  connectRooms();
+  $('#app').innerHTML = `<div class="wrap"><h2>Открытые комнаты</h2><p class="mu">Список обновляется в реальном времени.</p>${rooms.length ? rooms.map(r => `<div class="rrow"><div><b>${esc(r.name)}</b><div class="mu">Создатель: ${esc(r.host)} · ${r.count}/${r.max}</div></div><button class="sub pri" data-a="join" data-id="${r.id}">Присоединиться</button></div>`).join('') : '<p class="mu">Пока нет открытых комнат.</p>'}<div class="row"><button class="sub" data-a="back">${S ? '← В свою комнату' : '← В меню'}</button></div></div>`;
+}
+const frame = (p, cls = '', attr = '') => `<div class="fr ${cls}" ${attr}>${p.av ? `<img src="/avatar/${S.id}/${p.id}?v=${p.av}" alt="">` : esc((p.nick[0] || '?').toUpperCase())}</div>`;
+function renderLobby() {
+  const me = S.you.id, host = S.host === me;
+  $('#app').innerHTML = `<div class="wrap"><h2>${esc(S.name)}</h2><p class="mu">Нажмите на свою рамку, чтобы выбрать аватарку из галереи.</p>
+  ${S.players.map(p => `<div class="pl ${p.connected ? '' : 'off'}">${frame(p, p.id === me ? 'mine' : '', p.id === me ? 'data-a="avatar"' : '')}<div><b>${esc(p.nick)}</b>${p.id === S.host ? '<span class="tag">создатель</span>' : ''}${p.id === me ? ' <span class="mu">(вы)</span>' : ''}</div></div>`).join('')}
+  <p class="mu">Игроков: ${S.players.length} (нужно от ${S.min} до ${S.max})</p>
+  <div class="row">${host ? `<button class="sub pri" data-a="begin">Начать</button>` : ''}<button class="sub" data-a="rooms">Список комнат</button><button class="sub" data-a="leave">Выйти</button></div></div>`;
+}
+function cardsPanel() {
+  const id = viewing || S.you.id, p = S.players.find(x => x.id === id) || S.players.find(x => x.id === S.you.id);
+  const mine = p.id === S.you.id;
+  let h = `<h3>${mine ? 'Ваши карточки' : 'Карточки: ' + esc(p.nick)}</h3>`;
+  if (mine) h += `<div class="role"><b>${esc(S.you.role.name)}</b>${esc(S.you.role.d)}</div>`;
+  h += p.cards.map(c => `<div class="card ${c.type ? 't-' + c.type : ''}"><small>${esc(c.name)}${c.label ? ': ' + esc(c.label) : ''} · ${c.type ? TN[c.type] : 'личность'}</small><b>${esc(c.text)}</b></div>`).join('');
+  if (mine && S.you.evidence) h += `<button class="mini" data-a="evid">🔍 Улики (${S.you.evidence.length})</button>`;
+  if (!mine) h += `<div class="mu" style="font-size:12px">Нажмите в любом месте, чтобы вернуть свои карточки</div>`;
+  return h;
+}
+function logPanel() {
+  return S.log.map(e => {
+    if (e.kind === 'accuse') {
+      const a = S.accus.find(x => x.id === e.acc);
+      const can = a && !a.closed && !a.voted && S.phase === 'evening' && S.you.alive;
+      return `<div class="le accuse"><div class="bg">${esc(e.text)}</div><button data-a="vote" data-id="${e.acc}" ${can ? '' : 'disabled'}>Обвинить</button> <small>голосов: ${a ? a.n : '?'} (нужно больше ${Math.floor(S.players.filter(p => p.alive).length / 2)})</small></div>`;
+    }
+    return `<div class="le ${esc(e.kind)}">${esc(e.text)}</div>`;
+  }).join('');
+}
+function renderGame() {
+  const y = S.you, me = y.id, myTurn = S.phase === 'day' && S.turn === me && y.alive;
+  const cur = S.players.find(p => p.id === S.turn);
+  const lg = $('#log'), atBottom = !lg || lg.scrollHeight - lg.scrollTop - lg.clientHeight < 60;
+  let status = S.phase === 'day' ? (myTurn ? '⭐ Ваш ход!' : `Круг ${S.round} · День · ходит ${cur ? esc(cur.nick) : '—'}`) : S.phase === 'evening' ? `Круг ${S.round} · Вечер — обсуждение` : 'Игра окончена';
+  if (!y.alive && S.phase !== 'ended') status += ' · вы выбыли';
+  let btns = '';
+  if (S.phase === 'ended') btns = `<button class="r" data-a="leave">В меню</button>`;
+  else if (!y.alive) btns = `<span class="wait">Вы наблюдаете за игрой</span>`;
+  else if (myTurn) btns = `<button data-a="item">Предмет${y.items.length ? ' (' + y.items.length + ')' : ''}</button>${y.btnInspect ? '<button data-a="inspect">Осмотреть</button>' : ''}${y.btnRole ? '<button data-a="role">Роль</button>' : ''}<button class="r" data-a="skip">Пропустить</button>`;
+  else if (S.phase === 'evening') btns = `<button data-a="accuse">Обвинить</button><button class="r" data-a="eskip" ${S.skipped ? 'disabled' : ''}>Пропустить (${S.skips}/${S.need})</button>`;
+  else btns = `<span class="wait">Ждите своей очереди…</span>`;
+  $('#app').innerHTML = `${pickLoc ? `<div class="banner">${esc(pickLoc.hint || 'Выберите локацию на столе')}<button data-a="cancelpick">Отмена</button></div>` : ''}
+  <div class="game">
+   <aside class="panel" style="grid-area:auto">${cardsPanel()}</aside>
+   <main class="center"><div class="table">
+     <div class="prow">${S.players.map(p => `<div class="pc ${p.alive ? '' : 'dead'} ${p.id === S.turn ? 'turn' : ''} ${p.id === me ? 'me' : ''}" data-pl="${p.id}">${frame(p)}<span>${esc(p.nick)}</span></div>`).join('')}</div>
+     <div class="city"><img src="/city.jpg" alt="" onerror="this.remove()"><span>Здесь будет изображение города<br>(положите city.jpg в папку public)</span></div>
+     <div class="locs">${S.locs.map(l => `<div class="loc ${pickLoc ? 'pick' : ''}" data-loc="${l.id}"><img src="/loc/${l.id}.jpg" alt="" onerror="this.remove()"><div class="li">${l.icon}</div><b>${esc(l.name)}</b></div>`).join('')}</div>
+   </div><div class="status ${myTurn ? 'my' : ''}">${status}</div></main>
+   <aside class="panel" id="log" style="grid-area:auto"><h3>История игры</h3>${logPanel()}</aside>
+  </div><div class="btns">${btns}</div>`;
+  const l2 = $('#log'); if (atBottom) l2.scrollTop = l2.scrollHeight;
+  if (y.pending && modalKind !== 'letter') showModal(`<h3>✉ Кровавое письмо</h3><p>«Я видел, что вы сделали». Вам предлагают выбор:</p><button class="opt" data-a="letter" data-v="1">Стать сообщником убийцы<small>Вы будете помогать убийце</small></button><button class="opt" data-a="letter" data-v="0">Заявить о письме всем<small>Убийца сможет убить вас в свой ход, не тратя ход</small></button>`, 'letter', false);
+  if (S.phase === 'ended' && modalKind !== 'end' && modalKind !== 'endseen') {
+    const w = S.winner; showModal(`<h3>🏁 ${esc(w.text)}</h3>${S.roles.map(r => `<div class="le">${esc(r.nick)} — <b>${esc(r.role)}</b> ${r.alive ? '' : '✕'}</div>`).join('')}<div class="row"><button class="sub" data-a="mclose">Закрыть</button><button class="sub pri" data-a="leave">В меню</button></div>`, 'end');
+  }
+}
+
+// ---------- действия ----------
+async function act(m) {
+  const r = await post('/api/act', { ...m, token, rid: uid() });
+  if (r.err) toast(r.err); else if (r.msg) toast(r.msg, true);
+}
+function playerPick(title, filter, cb) {
+  showModal(`<h3>${esc(title)}</h3>${S.players.map(p => { const ok = filter(p); return `<button class="opt" data-a="pp" data-id="${p.id}" ${ok ? '' : 'disabled'}>${esc(p.nick)}${p.alive ? '' : ' ✕'}${p.id === S.you.id ? ' (вы)' : ''}</button>`; }).join('')}<div class="row"><button class="sub" data-a="mclose">Отмена</button></div>`, 'pp');
+  window._pp = id => { closeModal(); cb(id); };
+}
+function cluePick(cb) {
+  const ev = S.you.evidence || [];
+  if (!ev.length) return toast('У вас пока нет улик');
+  showModal(`<h3>Выберите улику</h3>${ev.map(e => `<button class="opt" data-a="cp" data-id="${e.id}">${esc(e.label)}<small>${esc(e.loc)} · ${esc(e.time)}</small></button>`).join('')}<div class="row"><button class="sub" data-a="mclose">Отмена</button></div>`, 'cp');
+  window._cp = id => { closeModal(); cb(id); };
+}
+function useItem(it) {
+  const m = { type: 'item', item: it.uid }; const steps = [...it.t];
+  const next = () => {
+    const t = steps.shift(); if (!t) return act(m);
+    if (t === 'loc') { closeModal(); pickLoc = { hint: 'Выберите локацию для «' + it.name + '»', cb: id => { m.loc = id; pickLoc = null; render(); next(); } }; render(); }
+    else if (t === 'player') playerPick('Выберите игрока', p => p.alive, id => { m.player = id; next(); });
+    else if (t === 'clue') cluePick(id => { m.clue = id; next(); });
+  };
+  closeModal(); next();
+}
+const actions = {
+  start: () => askNick('Создать комнату', n => enter('/api/create', { nick: n })),
+  rooms: () => { screen = 'rooms'; render(); },
+  back: () => { screen = S ? 'room' : 'menu'; render(); },
+  join: el => askNick('Присоединиться к комнате', n => enter('/api/join', { nick: n, roomId: el.dataset.id })),
+  leave: async () => { await post('/api/leave', { token }); drop(); },
+  begin: () => act({ type: 'start' }),
+  avatar: () => $('#file').click(),
+  mclose: () => { if (modalKind === 'end') modalKind = 'endseen'; const k = modalKind; $('#modal').className = ''; $('#modal').innerHTML = ''; modalKind = k === 'endseen' ? 'endseen' : null; },
+  skip: () => act({ type: 'skip' }),
+  eskip: () => act({ type: 'skip' }),
+  inspect: () => { pickLoc = { hint: 'Осмотр: нажмите на локацию на столе', cb: id => { pickLoc = null; render(); act({ type: 'inspect', loc: id }); } }; render(); },
+  cancelpick: () => { pickLoc = null; render(); },
+  role: () => { const tg = S.you.role.tg; if (tg === 'player') playerPick('Выберите цель — ' + S.you.role.name, p => p.alive && p.id !== S.you.id, id => act({ type: 'role', target: id })); else if (tg === 'dead') playerPick('Кого воскресить?', p => !p.alive, id => act({ type: 'role', target: id })); else act({ type: 'role' }); },
+  item: () => {
+    const its = S.you.items;
+    showModal(`<h3>Ваши предметы</h3>${its.length ? its.map(i => `<button class="opt" data-a="useitem" data-id="${i.uid}">${esc(i.name)}<small>${esc(i.d)}</small></button>`).join('') : '<p class="mu">Предметов пока нет. Они находятся при осмотре локаций (шанс 15%).</p>'}<div class="row"><button class="sub" data-a="mclose">Закрыть</button></div>`, 'items');
+  },
+  useitem: el => useItem(S.you.items.find(i => i.uid === el.dataset.id)),
+  evid: () => showModal(`<h3>Улики сыщика</h3>${(S.you.evidence || []).length ? S.you.evidence.map(e => `<div class="le">${esc(e.label)}<br><small class="mu">${esc(e.loc)} · время ${esc(e.time)}</small>${e.auth ? `<span class="ba ${e.auth}">${e.auth === 'real' ? 'подлинная' : 'подделка'}</span>` : ''}</div>`).join('') : '<p class="mu">Улик пока нет.</p>'}<div class="row"><button class="sub" data-a="mclose">Закрыть</button></div>`, 'evid'),
+  accuse: () => playerPick('Кого обвинить?', p => p.alive && p.id !== S.you.id, id => act({ type: 'accuse', target: id })),
+  vote: el => act({ type: 'vote', acc: el.dataset.id }),
+  letter: el => { closeModal(); act({ type: 'letter', accept: el.dataset.v === '1' }); },
+  pp: el => window._pp(el.dataset.id), cp: el => window._cp(el.dataset.id)
+};
+document.addEventListener('click', e => {
+  const pl = e.target.closest('[data-pl]');
+  if (pl && S && S.phase !== 'lobby' && !pickLoc) { viewing = viewing === pl.dataset.pl ? null : pl.dataset.pl; render(); e.stopPropagation(); return; }
+  const loc = e.target.closest('[data-loc]');
+  if (loc) { if (pickLoc) { pickLoc.cb(loc.dataset.loc); } else { const l = S.locs.find(x => x.id === loc.dataset.loc); toast(l.name + ': ' + l.d, true); } return; }
+  const a = e.target.closest('[data-a]');
+  if (a && actions[a.dataset.a] && !a.disabled) { actions[a.dataset.a](a); return; }
+  if (viewing && !e.target.closest('#modal')) { viewing = null; render(); }
+}, true);
+
+// аватарка: центрируем, уменьшаем до 128px
+$('#file').addEventListener('change', e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  const img = new Image(); img.onload = async () => {
+    const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d'), s = Math.min(img.width, img.height);
+    x.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 128, 128);
+    const r = await post('/api/avatar', { token, data: c.toDataURL('image/jpeg', .8) }); if (r.err) toast(r.err);
+  }; img.onerror = () => toast('Не удалось открыть изображение'); img.src = URL.createObjectURL(f);
+});
+
+// восстановление сессии после перезагрузки
+(async () => {
+  if (token) { try { const r = await fetch('/api/me?token=' + token); if (r.ok) { screen = 'room'; connect(); return; } } catch (e) {} drop(); } else render();
+})();
+</script></body></html>

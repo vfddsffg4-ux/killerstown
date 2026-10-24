@@ -1,0 +1,8 @@
+{
+  "name": "city-of-killers",
+  "version": "1.0.0",
+  "description": "Город убийц — многопользовательская браузерная игра",
+  "main": "server.js",
+  "scripts": { "start": "node server.js", "test": "MIN_PLAYERS=6 node test.js" },
+  "engines": { "node": ">=18" }
+}
